@@ -23,6 +23,7 @@ import (
 
 	"github.com/cert-manager/helm-tool/linter"
 	"github.com/cert-manager/helm-tool/parser"
+	"github.com/cert-manager/helm-tool/random"
 	"github.com/cert-manager/helm-tool/render"
 	"github.com/cert-manager/helm-tool/schema"
 	"github.com/spf13/cobra"
@@ -117,6 +118,30 @@ var Lint = cobra.Command{
 	},
 }
 
+var Random = cobra.Command{
+	Use: "random",
+	Run: func(cmd *cobra.Command, args []string) {
+		document, err := parser.Load(valuesFile, true)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Could not open %q: %s\n", valuesFile, err)
+			os.Exit(1)
+		}
+
+		randomData := []byte(nil)
+		if len(args) > 0 {
+			randomData = []byte(args[0])
+		}
+
+		renderedSchema, err := random.Render(document, randomData)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Could not render schema: %s\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Println(renderedSchema)
+	},
+}
+
 func init() {
 	Cmd.PersistentFlags().StringVarP(&valuesFile, "values", "i", "values.yaml", "values file used to generate the documentation")
 
@@ -130,6 +155,8 @@ func init() {
 	Render.PersistentFlags().StringVarP(&templateName, "template", "t", "markdown-plain", "template to render documentation with")
 
 	Cmd.AddCommand(&Schema)
+
+	Cmd.AddCommand(&Random)
 
 	Cmd.AddCommand(&Lint)
 	Lint.PersistentFlags().StringVarP(&templatesFolder, "templates", "d", "templates", "templates folder used to lint the values file")

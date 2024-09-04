@@ -17,10 +17,13 @@ limitations under the License.
 package funcs_serdes
 
 import (
+	"fmt"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
 )
+
+var ErrFail = fmt.Errorf("FAIL triggered")
 
 func FuncMap() template.FuncMap {
 	f := sprig.TxtFuncMap()
@@ -40,7 +43,7 @@ func FuncMap() template.FuncMap {
 		},
 		"include":  func(name string, data interface{}) (string, error) { return "", nil },
 		"required": func(warn string, val interface{}) (interface{}, error) { return nil, nil },
-		"fail":     func(msg string) (string, error) { return "", nil },
+		"fail":     func(msg string) (string, error) { return "", ErrFail },
 		"tpl":      func(tpl string, parentContext interface{}) (string, error) { return "", nil },
 	}
 
